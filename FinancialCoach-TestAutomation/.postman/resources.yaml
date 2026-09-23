@@ -1,11 +1,14 @@
 workspace:
   id: d69dec74-8047-4aa9-800a-33ee2cdbff94
+
 localResources:
   environments:
     - ../FinanceCoach.postman_environment.json
   specs:
-    - ../FinancialCoach-TestAutomation.json
+    - ../E:/project/Yeni
+      klasör/FinancialCoach-Test-Automation/FinancialCoach-TestAutomation/FinancialCoach-TestAutomation.json
     - ../postman/specs/FinancialCoach-TestAutomation/FinancialCoach-TestAutomation.json
 resourceNameMappings:
   specs:
+    - ../FinancialCoach-TestAutomation.json: FinancialCoach-TestAutomation.json
     - ../postman/specs/FinancialCoach-TestAutomation/FinancialCoach-TestAutomation.json: FinancialCoach-TestAutomation
