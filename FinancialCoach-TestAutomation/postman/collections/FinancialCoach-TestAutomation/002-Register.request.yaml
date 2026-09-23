@@ -1,0 +1,108 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/register"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"{{name}}\",\r
+
+    \  \"email\": \"{{email}}\",\r
+
+    \  \"password\": \"{{password}}\"\r
+
+    }"
+scripts:
+  - type: beforeRequest
+    code: "const timestamp = Date.now();\r
+
+      \r
+
+      pm.collectionVariables.set(\"name\", `Test User ${timestamp}`);\r
+
+      pm.collectionVariables.set(\"email\", `testuser${timestamp}@example.com`);\r
+
+      pm.collectionVariables.set(\"password\", \"Test123!!\");"
+    language: text/javascript
+  - type: afterResponse
+    code: "const response = pm.response.json();\r
+
+      \r
+
+      pm.test(\"Status code is 200\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Response has access_token\", function () {\r
+
+      \    pm.expect(response).to.have.property(\"access_token\");\r
+
+      \    pm.expect(response.access_token).to.be.a(\"string\");\r
+
+      \    pm.expect(response.access_token).to.not.be.empty;\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Token type is bearer\", function () {\r
+
+      \    pm.expect(response.token_type).to.eql(\"bearer\");\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Response has user object\", function () {\r
+
+      \    pm.expect(response).to.have.property(\"user\");\r
+
+      \    pm.expect(response.user).to.be.an(\"object\");\r
+
+      });\r
+
+      \r
+
+      pm.test(\"User fields are correct\", function () {\r
+
+      \    pm.expect(response.user).to.have.property(\"id\");\r
+
+      \    pm.expect(response.user.id).to.be.a(\"number\");\r
+
+      \r
+
+      \    pm.expect(response.user).to.have.property(\"name\");\r
+
+      \    pm.expect(response.user.name).to.be.a(\"string\");\r
+
+      \r
+
+      \    pm.expect(response.user).to.have.property(\"email\");\r
+
+      \    pm.expect(response.user.email).to.be.a(\"string\");\r
+
+      \r
+
+      \    pm.expect(response.user).to.have.property(\"role\");\r
+
+      \    pm.expect(response.user.role).to.be.a(\"string\");\r
+
+      \r
+
+      \    pm.expect(response.user).to.have.property(\"subscription_type\");\r
+
+      \    pm.expect(response.user.subscription_type).to.be.a(\"string\");\r
+
+      \r
+
+      \    pm.expect(response.user).to.have.property(\"subscription_expires_at\");\r
+
+      \    pm.expect(response.user.subscription_expires_at).to.be.a(\"string\");\r
+
+      });"
+    language: text/javascript
+order: 2746905786001084
