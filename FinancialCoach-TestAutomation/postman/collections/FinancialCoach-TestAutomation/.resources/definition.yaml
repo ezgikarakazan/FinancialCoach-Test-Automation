@@ -1,5 +1,0 @@
-$kind: collection
-variables:
-  name: ""
-  email: ""
-  password: ""

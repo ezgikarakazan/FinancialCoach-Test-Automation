@@ -1,9 +1,11 @@
-# Use this workspace to collaborate
 workspace:
   id: d69dec74-8047-4aa9-800a-33ee2cdbff94
-
-# All resources in the `postman/` folder are automatically registered in Local View.
-# Point to additional files outside the `postman/` folder to register them individually. Example:
-#localResources:
-#  collections:
-#    - ../tests/E2E Test Collection/
+localResources:
+  environments:
+    - ../FinanceCoach.postman_environment.json
+  specs:
+    - ../FinancialCoach-TestAutomation.json
+    - ../postman/specs/FinancialCoach-TestAutomation/FinancialCoach-TestAutomation.json
+resourceNameMappings:
+  specs:
+    - ../postman/specs/FinancialCoach-TestAutomation/FinancialCoach-TestAutomation.json: FinancialCoach-TestAutomation
