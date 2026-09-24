@@ -48,6 +48,26 @@
           "item": [
             {
               "name": "Register",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\npm.variables.set(\"name\", `Test User ${randomNumber}`);\r\npm.variables.set(\"email\", `testuser${randomNumber}@example.com`);\r\npm.variables.set(\"password\", \"Test123!!\");"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response has access_token\", function () {\r\n    pm.expect(response).to.have.property(\"access_token\");\r\n    pm.expect(response.access_token).to.be.a(\"string\");\r\n    pm.expect(response.access_token).to.not.be.empty;\r\n});\r\n\r\npm.test(\"Token type is bearer\", function () {\r\n    pm.expect(response.token_type).to.eql(\"bearer\");\r\n});\r\n\r\npm.test(\"Response has user object\", function () {\r\n    pm.expect(response).to.have.property(\"user\");\r\n    pm.expect(response.user).to.be.an(\"object\");\r\n});\r\n\r\npm.test(\"User fields are correct\", function () {\r\n    pm.expect(response.user).to.have.property(\"id\");\r\n    pm.expect(response.user.id).to.be.a(\"number\");\r\n\r\n    pm.expect(response.user).to.have.property(\"name\");\r\n    pm.expect(response.user.name).to.be.a(\"string\");\r\n\r\n    pm.expect(response.user).to.have.property(\"email\");\r\n    pm.expect(response.user.email).to.be.a(\"string\");\r\n\r\n    pm.expect(response.user).to.have.property(\"role\");\r\n    pm.expect(response.user.role).to.be.a(\"string\");\r\n\r\n    pm.expect(response.user).to.have.property(\"subscription_type\");\r\n    pm.expect(response.user.subscription_type).to.be.a(\"string\");\r\n\r\n    pm.expect(response.user).to.have.property(\"subscription_expires_at\");\r\n    pm.expect(response.user.subscription_expires_at).to.be.a(\"string\");\r\n});"
+                    ]
+                  }
+                }
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -58,10 +78,9 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"password\": \"\"\n}",
+                  "raw": "{\n  \"name\": \"{{name}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
                   "options": {
                     "raw": {
-                      "headerFamily": "json",
                       "language": "json"
                     }
                   }
