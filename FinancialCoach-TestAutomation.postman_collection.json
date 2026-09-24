@@ -1,0 +1,103 @@
+{
+  "info": {
+    "_postman_id": "9accc83e-601b-4979-a1f1-85669c254b6d",
+    "name": "FinancialCoach-TestAutomation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58259793",
+    "_collection_link": "https://go.postman.co/collection/58259793-9accc83e-601b-4979-a1f1-85669c254b6d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "/",
+      "item": [
+        {
+          "name": "Home",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response is a string\", function () {\r\n    pm.expect(pm.response.text()).to.be.a(\"string\");\r\n});\r\n\r\n/*pm.test(\"Response message is correct\", function () {\r\n    pm.expect(pm.response.text()).to.eql(\"AI Finance Coach API\");\r\n});*/\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "register",
+          "item": [
+            {
+              "name": "Register",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"password\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "{{baseUrl}}"
+    }
+  ]
+}
