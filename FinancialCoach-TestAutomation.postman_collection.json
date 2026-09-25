@@ -344,6 +344,197 @@
           ]
         }
       ]
+    },
+    {
+      "name": "admin",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Admin login status is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Admin token is returned\", function () {\r\n    pm.expect(response).to.have.property(\"access_token\").that.is.a(\"string\").and.not.empty;\r\n});\r\n\r\npm.test(\"Logged in user has admin role\", function () {\r\n    pm.expect(response.user.role).to.eql(\"admin\");\r\n});\r\n\r\npm.collectionVariables.set(\"admin_access_token\", response.access_token);"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"adminEmail\", \"etest58@test.com\");\r\npm.collectionVariables.set(\"adminPassword\", \"Test123!!\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"{{adminEmail}}\",\r\n  \"password\": \"{{adminPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 for admin\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response body is returned\", function () {\r\n    const body = pm.response.text();\r\n    pm.expect(body).to.be.a(\"string\").and.not.empty;\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "overview"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "dashboard",
+      "item": [
+        {
+          "name": "Dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response body is returned\", function () {\r\n    const body = pm.response.text();\r\n    pm.expect(body).to.be.a(\"string\").and.not.empty;\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "upload-pdf",
+      "item": [
+        {
+          "name": "Upload-Pdf",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"statement_type\", \"bank_statement\");\r\npm.collectionVariables.set(\"institution_name\", \"Test Bank\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable for file upload\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(10000);\r\n});\r\n\r\npm.test(\"Response body is returned\", function () {\r\n    const body = pm.response.text();\r\n    pm.expect(body).to.be.a(\"string\").and.not.empty;\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "bir test PDF'i seç",
+                  "src": [
+                    "/C:/Users/ezgi_/Downloads/2026 Temmuz ayı hesap özetiniz.pdf"
+                  ]
+                },
+                {
+                  "key": "statement_type",
+                  "value": "",
+                  "type": "text",
+                  "description": "{{statement_type}}"
+                },
+                {
+                  "key": "institution_name",
+                  "value": "",
+                  "type": "text",
+                  "description": "{{institution_name}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload-pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "upload-pdf"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "auth": {
@@ -405,6 +596,26 @@
     },
     {
       "key": "old_password",
+      "value": ""
+    },
+    {
+      "key": "admin_access_token",
+      "value": ""
+    },
+    {
+      "key": "adminEmail",
+      "value": ""
+    },
+    {
+      "key": "adminPassword",
+      "value": ""
+    },
+    {
+      "key": "statement_type",
+      "value": ""
+    },
+    {
+      "key": "institution_name",
       "value": ""
     }
   ]
