@@ -54,7 +54,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\npm.variables.set(\"name\", `Test User ${randomNumber}`);\r\npm.variables.set(\"email\", `testuser${randomNumber}@example.com`);\r\npm.variables.set(\"password\", \"Test123!!\");"
+                      "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\npm.collectionVariables.set(\"name\", `Test User ${randomNumber}`);\r\npm.collectionVariables.set(\"email\", `testuser${randomNumber}@example.com`);\r\npm.collectionVariables.set(\"password\", \"Test123!!\");"
                     ]
                   }
                 },
@@ -99,6 +99,249 @@
               "response": []
             }
           ]
+        },
+        {
+          "name": "login",
+          "item": [
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response has access_token\", function () {\r\n    pm.expect(response).to.have.property(\"access_token\");\r\n    pm.expect(response.access_token).to.be.a(\"string\").and.not.empty;\r\n});\r\n\r\npm.test(\"Token type is bearer\", function () {\r\n    pm.expect(response.token_type).to.eql(\"bearer\");\r\n});\r\n\r\npm.test(\"Logged in user email matches\", function () {\r\n    pm.expect(response.user.email).to.eql(pm.collectionVariables.get(\"email\"));\r\n});\r\n\r\npm.collectionVariables.set(\"access_token\", response.access_token);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "me",
+          "item": [
+            {
+              "name": "GET/me",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response is JSON\", function () {\r\n    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r\n});\r\n\r\npm.test(\"User fields exist and have correct types\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"name\").that.is.a(\"string\").and.not.empty;\r\n    pm.expect(response).to.have.property(\"email\").that.is.a(\"string\").and.not.empty;\r\n    pm.expect(response).to.have.property(\"role\").that.is.a(\"string\").and.not.empty;\r\n    pm.expect(response).to.have.property(\"subscription_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"subscription_expires_at\");\r\n});\r\n\r\npm.test(\"subscription_expires_at is a valid date\", function () {\r\n    // Free kullanıcılarda null dönüyorsa bu testi null'a izin verecek şekilde değiştir\r\n    pm.expect(response.subscription_expires_at).to.be.a(\"string\");\r\n    pm.expect(new Date(response.subscription_expires_at).toString()).to.not.eql(\"Invalid Date\");\r\n});\r\n\r\npm.test(\"Email format is valid\", function () {\r\n    pm.expect(response.email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);\r\n});\r\n\r\npm.test(\"Returned user matches the registered user\", function () {\r\n    pm.expect(response.email).to.eql(pm.collectionVariables.get(\"email\"));\r\n    pm.expect(response.name).to.eql(pm.collectionVariables.get(\"name\"));\r\n});\r\n\r\npm.test(\"Password is not exposed\", function () {\r\n    pm.expect(response).to.not.have.property(\"password\");\r\n    pm.expect(response).to.not.have.property(\"hashed_password\");\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "PUT/me",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response has all user fields\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"name\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"email\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"role\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"subscription_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"subscription_expires_at\");\r\n});\r\n\r\npm.test(\"Name and email are updated\", function () {\r\n    pm.expect(response.name).to.eql(pm.collectionVariables.get(\"updated_name\"));\r\n    pm.expect(response.email).to.eql(pm.collectionVariables.get(\"updated_email\"));\r\n});\r\n\r\npm.test(\"Protected fields are unchanged\", function () {\r\n    pm.expect(response.role).to.eql(\"user\");\r\n    pm.expect(response.subscription_type).to.eql(\"free\");\r\n});\r\n\r\npm.test(\"Password is not exposed\", function () {\r\n    pm.expect(response).to.not.have.property(\"password\");\r\n    pm.expect(response).to.not.have.property(\"hashed_password\");\r\n});\r\n\r\n// Başarılıysa ana değişkenleri güncelle; sonraki Login ve Me testleri yeni değerlerle çalışsın\r\nif (pm.response.code === 200) {\r\n    pm.collectionVariables.set(\"name\", response.name);\r\n    pm.collectionVariables.set(\"email\", response.email);\r\n}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\npm.collectionVariables.set(\"updated_name\", `Updated User ${randomNumber}`);\r\npm.collectionVariables.set(\"updated_email\", `updateduser${randomNumber}@example.com`);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"{{updated_name}}\",\r\n  \"email\": \"{{updated_email}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "change password",
+          "item": [
+            {
+              "name": "Change Password",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\npm.collectionVariables.set(\"new_password\", `NewPass${randomNumber}!!`);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response is a non-empty message\", function () {\r\n    // Swagger'da 200 yanıtı \"string\" görünüyor\r\n    const body = pm.response.text();\r\n    pm.expect(body).to.be.a(\"string\").and.not.empty;\r\n});\r\n\r\npm.test(\"Password is not exposed in response\", function () {\r\n    const body = pm.response.text();\r\n    pm.expect(body).to.not.include(pm.collectionVariables.get(\"new_password\"));\r\n    pm.expect(body).to.not.include(pm.collectionVariables.get(\"password\"));\r\n});\r\n\r\n// Başarılıysa şifreleri güncelle; sonraki Login yeni şifreyle çalışsın\r\nif (pm.response.code === 200) {\r\n    pm.collectionVariables.set(\"old_password\", pm.collectionVariables.get(\"password\"));\r\n    pm.collectionVariables.set(\"password\", pm.collectionVariables.get(\"new_password\"));\r\n}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"current_password\": \"{{password}}\",\r\n  \"new_password\": \"{{new_password}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/change-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "change-password"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Login with new password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n  \"email\": \"{{email}}\",\n  \"password\": \"{{new_password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Login with old password",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"{{password}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
         }
       ]
     }
@@ -108,15 +351,61 @@
     "bearer": [
       {
         "key": "token",
-        "value": "{{bearerToken}}",
+        "value": "{{access_token}}",
         "type": "string"
       }
     ]
   },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          "pm.test(\"Response time < 2000ms\", function () {\r",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+          "});\r",
+          "\r",
+          "pm.test(\"Response is JSON\", function () {\r",
+          "    pm.response.to.have.header(\"Content-Type\");\r",
+          "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+          "});"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
   "variable": [
     {
-      "key": "baseUrl",
-      "value": "{{baseUrl}}"
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "name",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": ""
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "updated_name",
+      "value": ""
+    },
+    {
+      "key": "updated_email",
+      "value": ""
+    },
+    {
+      "key": "new_password",
+      "value": ""
+    },
+    {
+      "key": "old_password",
+      "value": ""
     }
   ]
 }
