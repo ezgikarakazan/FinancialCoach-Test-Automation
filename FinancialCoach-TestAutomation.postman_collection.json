@@ -489,7 +489,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable for file upload\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(10000);\r\n});\r\n\r\npm.test(\"Response body is returned\", function () {\r\n    const body = pm.response.text();\r\n    pm.expect(body).to.be.a(\"string\").and.not.empty;\r\n});"
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\nif (pm.response.code === 200) {\r\n    pm.collectionVariables.set(\"upload_id\", pm.response.json().upload_id);\r\n}\r\n\r\npm.test(\"Response time is acceptable for file upload\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(10000);\r\n});\r\n\r\npm.test(\"Response body is returned\", function () {\r\n    const body = pm.response.text();\r\n    pm.expect(body).to.be.a(\"string\").and.not.empty;\r\n});"
                 ]
               }
             }
@@ -529,6 +529,166 @@
               ],
               "path": [
                 "upload-pdf"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pdf-Upload",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response is an array\", function () {\r\n    pm.expect(response).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"List is not empty after previous upload\", function () {\r\n    pm.expect(response).to.not.be.empty;\r\n});\r\n\r\npm.test(\"Each upload has the expected fields\", function () {\r\n    response.forEach(function (upload) {\r\n        pm.expect(upload).to.have.property(\"id\").that.is.a(\"number\");\r\n        pm.expect(upload).to.have.property(\"filename\").that.is.a(\"string\").and.not.empty;\r\n        pm.expect(upload).to.have.property(\"uploaded_at\").that.is.a(\"string\");\r\n        pm.expect(upload).to.have.property(\"total_count\").that.is.a(\"number\");\r\n        pm.expect(upload).to.have.property(\"added_count\").that.is.a(\"number\");\r\n        pm.expect(upload).to.have.property(\"skipped_count\").that.is.a(\"number\");\r\n        pm.expect(upload).to.have.property(\"pending_count\").that.is.a(\"number\");\r\n        pm.expect(upload).to.have.property(\"institution_name\");\r\n    });\r\n});\r\n\r\npm.test(\"uploaded_at values are valid dates\", function () {\r\n    response.forEach(function (upload) {\r\n        pm.expect(new Date(upload.uploaded_at).toString()).to.not.eql(\"Invalid Date\");\r\n    });\r\n});\r\n\r\npm.test(\"Counts are non-negative\", function () {\r\n    response.forEach(function (upload) {\r\n        pm.expect(upload.total_count).to.be.at.least(0);\r\n        pm.expect(upload.added_count).to.be.at.least(0);\r\n        pm.expect(upload.skipped_count).to.be.at.least(0);\r\n        pm.expect(upload.pending_count).to.be.at.least(0);\r\n    });\r\n});\r\n\r\npm.test(\"added + skipped + pending does not exceed total\", function () {\r\n    response.forEach(function (upload) {\r\n        pm.expect(upload.added_count + upload.skipped_count + upload.pending_count).to.be.at.most(upload.total_count);\r\n    });\r\n});\r\n\r\npm.test(\"List includes the upload created in this run\", function () {\r\n    const uploadId = Number(pm.collectionVariables.get(\"upload_id\"));\r\n    const found = response.find(u => u.id === uploadId);\r\n    pm.expect(found, `upload_id ${uploadId} listede bulunamadı`).to.not.be.undefined;\r\n});\r\n\r\npm.test(\"Uploads belong only to the current user\", function () {\r\n    // Bu endpoint sadece giriş yapan kullanıcının upload'larını dönmeli.\r\n    // Başka bir kullanıcının upload_id'si varsa (örn. admin_upload_id) listede olmamalı.\r\n    const otherUploadId = Number(pm.collectionVariables.get(\"admin_upload_id\"));\r\n    if (otherUploadId) {\r\n        const leaked = response.find(u => u.id === otherUploadId);\r\n        pm.expect(leaked, \"Başka kullanıcının upload'ı listede görünüyor\").to.be.undefined;\r\n    }\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pdf-uploads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdf-uploads"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\nif (pm.response.code === 200) {\r\n    pm.collectionVariables.set(\"item_id\", pm.response.json().items[0].id);\r\n}\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Upload fields are correct\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"filename\").that.is.a(\"string\").and.not.empty;\r\n    pm.expect(response).to.have.property(\"uploaded_at\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"institution_name\");\r\n    pm.expect(response).to.have.property(\"items\").that.is.an(\"array\");\r\n});\r\n\r\npm.test(\"Returned id matches the id used from the list\", function () {\r\n    pm.expect(response.id).to.eql(Number(pm.collectionVariables.get(\"upload_id_from_list\")));\r\n});\r\n\r\npm.test(\"Detail response is consistent with list response\", function () {\r\n    // List'te total_count vardı, detail'de items dizisinin uzunluğu total_count ile tutarlı olmalı\r\n    // (skipped kayıtlar da items içinde dönüyorsa bu testi kaldır)\r\n});\r\n\r\npm.test(\"uploaded_at is a valid date\", function () {\r\n    pm.expect(new Date(response.uploaded_at).toString()).to.not.eql(\"Invalid Date\");\r\n});\r\n\r\nresponse.items.forEach(function (item, index) {\r\n    pm.test(`Item ${index} has expected fields`, function () {\r\n        pm.expect(item).to.have.property(\"id\").that.is.a(\"number\");\r\n        pm.expect(item).to.have.property(\"date\").that.is.a(\"string\");\r\n        pm.expect(item).to.have.property(\"title\").that.is.a(\"string\");\r\n        pm.expect(item).to.have.property(\"amount\");\r\n        pm.expect(item).to.have.property(\"category\");\r\n        pm.expect(item).to.have.property(\"source_type\");\r\n        pm.expect(item).to.have.property(\"transaction_type\");\r\n        pm.expect(item).to.have.property(\"status\");\r\n    });\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pdf-uploads/{{upload_id}}?upload_id={{upload_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdf-uploads",
+                "{{upload_id}}"
+              ],
+              "query": [
+                {
+                  "key": "upload_id",
+                  "value": "{{upload_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ItemId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Item fields are returned\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"date\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"title\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"category\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"source_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"transaction_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"status\").that.is.a(\"string\");\r\n});\r\n\r\npm.test(\"Returned item matches the requested item_id\", function () {\r\n    pm.expect(response.id).to.eql(Number(pm.collectionVariables.get(\"item_id\")));\r\n});\r\n\r\npm.test(\"Title and category are updated as sent\", function () {\r\n    pm.expect(response.title).to.eql(pm.collectionVariables.get(\"decide_title\"));\r\n    pm.expect(response.category).to.eql(pm.collectionVariables.get(\"decide_category\"));\r\n    pm.expect(response.source_type).to.eql(pm.collectionVariables.get(\"decide_source_type\"));\r\n});\r\n\r\npm.test(\"Status reflects the decision made\", function () {\r\n    // Gönderilen status ile dönen status birebir aynı olmayabilir (API normalize ediyor olabilir),\r\n    // ilk çalıştırmada gerçek değeri görüp eşleştir\r\n    pm.expect(response.status).to.eql(pm.collectionVariables.get(\"decide_status\"));\r\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"decide_status\", \"approved\");\r\npm.collectionVariables.set(\"decide_title\", \"Test onaylanan işlem\");\r\npm.collectionVariables.set(\"decide_description\", \"Postman testi ile onaylandı\");\r\npm.collectionVariables.set(\"decide_category\", \"groceries\");\r\npm.collectionVariables.set(\"decide_source_type\", \"bank_statement\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"status\": \"{{decide_status}}\",\r\n  \"title\": \"{{decide_title}}\",\r\n  \"description\": \"{{decide_description}}\",\r\n  \"category\": \"{{decide_category}}\",\r\n  \"source_type\": \"{{decide_source_type}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pdf-uploads/{{upload_id}}/items/{{item_id}}/decide?upload_id={{upload_id}}&item_id={{item_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdf-uploads",
+                "{{upload_id}}",
+                "items",
+                "{{item_id}}",
+                "decide"
+              ],
+              "query": [
+                {
+                  "key": "upload_id",
+                  "value": "{{upload_id}}"
+                },
+                {
+                  "key": "item_id",
+                  "value": "{{item_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "transactions",
+      "item": [
+        {
+          "name": "Get/Transactions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response is an array\", function () {\r\n    pm.expect(response).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Each transaction has the expected fields\", function () {\r\n    response.forEach(function (tx) {\r\n        pm.expect(tx).to.have.property(\"id\").that.is.a(\"number\");\r\n        pm.expect(tx).to.have.property(\"title\").that.is.a(\"string\");\r\n        pm.expect(tx).to.have.property(\"description\");\r\n        pm.expect(tx).to.have.property(\"amount\");\r\n        pm.expect(tx).to.have.property(\"category\").that.is.a(\"string\");\r\n        pm.expect(tx).to.have.property(\"date\").that.is.a(\"string\");\r\n        pm.expect(tx).to.have.property(\"source_type\").that.is.a(\"string\");\r\n        pm.expect(tx).to.have.property(\"transaction_type\").that.is.a(\"string\");\r\n        pm.expect(tx).to.have.property(\"institution_name\");\r\n    });\r\n});\r\n\r\npm.test(\"Dates are valid and in YYYY-MM-DD format\", function () {\r\n    response.forEach(function (tx) {\r\n        pm.expect(tx.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);\r\n        pm.expect(new Date(tx.date).toString()).to.not.eql(\"Invalid Date\");\r\n    });\r\n});\r\n\r\npm.test(\"Amounts are numeric\", function () {\r\n    response.forEach(function (tx) {\r\n        pm.expect(Number.isNaN(Number(tx.amount))).to.be.false;\r\n    });\r\n});\r\n\r\npm.test(\"transaction_type has a valid value\", function () {\r\n    // Gerçek enum değerlerini gördükten sonra bu listeyi kesinleştir\r\n    response.forEach(function (tx) {\r\n        pm.expect([\"income\", \"expense\"]).to.include(tx.transaction_type);\r\n    });\r\n});\r\n\r\npm.test(\"Transactions belong only to the current user\", function () {\r\n    // Bu endpoint sadece giriş yapan kullanıcının işlemlerini dönmeli.\r\n    // Decide edilen item'ın transaction'a dönüşüp dönüşmediğini de burada doğrulayabiliriz.\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions"
               ]
             }
           },
@@ -616,6 +776,38 @@
     },
     {
       "key": "institution_name",
+      "value": ""
+    },
+    {
+      "key": "upload_id",
+      "value": ""
+    },
+    {
+      "key": "upload_id_from_list",
+      "value": ""
+    },
+    {
+      "key": "item_id",
+      "value": ""
+    },
+    {
+      "key": "decide_status",
+      "value": ""
+    },
+    {
+      "key": "decide_title",
+      "value": ""
+    },
+    {
+      "key": "decide_description",
+      "value": ""
+    },
+    {
+      "key": "decide_category",
+      "value": ""
+    },
+    {
+      "key": "decide_source_type",
       "value": ""
     }
   ]
