@@ -480,7 +480,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.collectionVariables.set(\"statement_type\", \"bank_statement\");\r\npm.collectionVariables.set(\"institution_name\", \"Test Bank\");"
+                  "pm.collectionVariables.set(\"statement_type\", \"bank\");\r\npm.collectionVariables.set(\"institution_name\", \"Test Bank\");"
                 ]
               }
             },
@@ -489,7 +489,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\nif (pm.response.code === 200) {\r\n    pm.collectionVariables.set(\"upload_id\", pm.response.json().upload_id);\r\n}\r\n\r\npm.test(\"Response time is acceptable for file upload\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(10000);\r\n});\r\n\r\npm.test(\"Response body is returned\", function () {\r\n    const body = pm.response.text();\r\n    pm.expect(body).to.be.a(\"string\").and.not.empty;\r\n});"
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\nif (pm.response.code === 200) {\r\n    const body = pm.response.json();\r\n    pm.collectionVariables.set(\"upload_id\", body.upload_id);\r\n\r\n    if (Array.isArray(body.parsed_transactions) && body.parsed_transactions.length > 0) {\r\n        pm.collectionVariables.set(\"item_id\", body.parsed_transactions[0].id);\r\n    }\r\n}\r\n\r\npm.test(\"Response time is acceptable for file upload\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(10000);\r\n});\r\n\r\npm.test(\"Response body is returned\", function () {\r\n    const body = pm.response.text();\r\n    pm.expect(body).to.be.a(\"string\").and.not.empty;\r\n});"
                 ]
               }
             }
@@ -609,7 +609,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Item fields are returned\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"date\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"title\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"category\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"source_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"transaction_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"status\").that.is.a(\"string\");\r\n});\r\n\r\npm.test(\"Returned item matches the requested item_id\", function () {\r\n    pm.expect(response.id).to.eql(Number(pm.collectionVariables.get(\"item_id\")));\r\n});\r\n\r\npm.test(\"Title and category are updated as sent\", function () {\r\n    pm.expect(response.title).to.eql(pm.collectionVariables.get(\"decide_title\"));\r\n    pm.expect(response.category).to.eql(pm.collectionVariables.get(\"decide_category\"));\r\n    pm.expect(response.source_type).to.eql(pm.collectionVariables.get(\"decide_source_type\"));\r\n});\r\n\r\npm.test(\"Status reflects the decision made\", function () {\r\n    // Gönderilen status ile dönen status birebir aynı olmayabilir (API normalize ediyor olabilir),\r\n    // ilk çalıştırmada gerçek değeri görüp eşleştir\r\n    pm.expect(response.status).to.eql(pm.collectionVariables.get(\"decide_status\"));\r\n});"
+                  "const response = pm.response.json();\n\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response time is acceptable\", function () {\n    pm.expect(pm.response.responseTime).to.be.below(2000);\n});\n\npm.test(\"Item fields are returned\", function () {\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\n    pm.expect(response).to.have.property(\"title\").that.is.a(\"string\");\n    pm.expect(response).to.have.property(\"category\").that.is.a(\"string\");\n    pm.expect(response).to.have.property(\"source_type\").that.is.a(\"string\");\n    pm.expect(response).to.have.property(\"transaction_type\").that.is.a(\"string\");\n    pm.expect(response).to.have.property(\"status\").that.is.a(\"string\");\n});\n\npm.test(\"Returned item matches the requested item_id\", function () {\n    pm.expect(response.id).to.eql(Number(pm.collectionVariables.get(\"item_id\")));\n});\n\npm.test(\"Title and category are updated as sent\", function () {\n    pm.expect(response.title).to.eql(pm.collectionVariables.get(\"decide_title\"));\n    pm.expect(response.category).to.eql(pm.collectionVariables.get(\"decide_category\"));\n    pm.expect(response.source_type).to.eql(pm.collectionVariables.get(\"decide_source_type\"));\n});\n\npm.test(\"Status is 'added'\", function () {\n    pm.expect(response.status).to.eql(\"added\");\n});\n\n// Sonraki Transactions testinde kullanmak için başlığı kaydet\nif (pm.response.code === 200) {\n    pm.collectionVariables.set(\"decided_item_title\", response.title);\n}"
                 ]
               }
             },
@@ -618,7 +618,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.collectionVariables.set(\"decide_status\", \"approved\");\r\npm.collectionVariables.set(\"decide_title\", \"Test onaylanan işlem\");\r\npm.collectionVariables.set(\"decide_description\", \"Postman testi ile onaylandı\");\r\npm.collectionVariables.set(\"decide_category\", \"groceries\");\r\npm.collectionVariables.set(\"decide_source_type\", \"bank_statement\");"
+                  "pm.collectionVariables.set(\"decide_status\", \"added\");\r\npm.collectionVariables.set(\"decide_title\", `Test işlem ${Math.floor(Math.random() * 100000)}`);\r\npm.collectionVariables.set(\"decide_description\", \"Postman testi ile onaylandı\");\r\n\r\nconst statementType = pm.collectionVariables.get(\"statement_type\") || \"bank\";\r\npm.collectionVariables.set(\"decide_source_type\", statementType);\r\n\r\nfunction guessCategory(title) {\r\n    const lower = (title || \"\").toLowerCase();\r\n    const rules = [\r\n        { keys: [\"market\", \"migros\", \"carrefour\", \"a101\", \"bim\", \"şok\", \"sok\", \"shop\", \"trendyol\", \"hepsiburada\", \"amazon\", \"akpos\"], category: \"Alışveriş\" },\r\n        { keys: [\"okul\", \"üniversite\", \"universite\", \"egitim\", \"eğitim\", \"kurs\", \"udemy\", \"kitap\", \"yks\"], category: \"Eğitim\" },\r\n        { keys: [\"sinema\", \"netflix\", \"spotify\", \"oyun\", \"eglence\", \"eğlence\", \"tiyatro\", \"steam\"], category: \"Eğlence\" },\r\n        { keys: [\"rest\", \"kafe\", \"cafe\", \"yemek\", \"yeme\", \"starbucks\", \"burger\", \"kahve\"], category: \"Yeme İçme\" },\r\n        { keys: [\"uber\", \"taksi\", \"metro\", \"otobüs\", \"otobus\", \"yakıt\", \"yakit\", \"shell\", \"opet\"], category: \"Ulaşım\" },\r\n        { keys: [\"kira\", \"elektrik\", \"su\", \"doğalgaz\", \"dogalgaz\", \"aidat\", \"internet\"], category: \"Faturalar\" },\r\n        { keys: [\"eczane\", \"hastane\", \"doktor\", \"sağlık\", \"saglik\"], category: \"Sağlık\" },\r\n    ];\r\n    for (const rule of rules) {\r\n        if (rule.keys.some(k => lower.includes(k))) return rule.category;\r\n    }\r\n    return \"Diğer\";\r\n}\r\npm.collectionVariables.set(\"decide_category\", guessCategory(pm.collectionVariables.get(\"decide_title\")));"
                 ]
               }
             }
@@ -682,6 +682,52 @@
           "request": {
             "method": "GET",
             "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Transacation",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\nfunction guessCategory(title) {\r\n    const lower = (title || \"\").toLowerCase();\r\n    const rules = [\r\n        { keys: [\"market\", \"migros\", \"carrefour\", \"a101\", \"bim\", \"şok\", \"sok\", \"shop\", \"trendyol\", \"hepsiburada\", \"amazon\", \"akpos\"], category: \"Alışveriş\" },\r\n        { keys: [\"okul\", \"üniversite\", \"universite\", \"egitim\", \"eğitim\", \"kurs\", \"udemy\", \"kitap\", \"yks\"], category: \"Eğitim\" },\r\n        { keys: [\"sinema\", \"netflix\", \"spotify\", \"oyun\", \"eglence\", \"eğlence\", \"tiyatro\", \"steam\"], category: \"Eğlence\" },\r\n        { keys: [\"rest\", \"kafe\", \"cafe\", \"yemek\", \"yeme\", \"starbucks\", \"burger\", \"kahve\"], category: \"Yeme İçme\" },\r\n        { keys: [\"uber\", \"taksi\", \"metro\", \"otobüs\", \"otobus\", \"yakıt\", \"yakit\", \"shell\", \"opet\"], category: \"Ulaşım\" },\r\n        { keys: [\"kira\", \"elektrik\", \"su\", \"doğalgaz\", \"dogalgaz\", \"aidat\", \"internet\"], category: \"Faturalar\" },\r\n        { keys: [\"eczane\", \"hastane\", \"doktor\", \"sağlık\", \"saglik\"], category: \"Sağlık\" },\r\n    ];\r\n    for (const rule of rules) {\r\n        if (rule.keys.some(k => lower.includes(k))) return rule.category;\r\n    }\r\n    return \"Diğer\";\r\n}\r\n\r\nconst title = `Market alışverişi ${randomNumber}`;\r\nconst amount = -(Math.floor(Math.random() * 500) + 10); // negatif = gider\r\n\r\nconst today = new Date();\r\nconst isoDate = today.toISOString().split(\"T\")[0]; // YYYY-MM-DD\r\n\r\npm.collectionVariables.set(\"tx_title\", title);\r\npm.collectionVariables.set(\"tx_amount\", amount);\r\npm.collectionVariables.set(\"tx_category\", guessCategory(title));\r\npm.collectionVariables.set(\"tx_date\", isoDate);\r\npm.collectionVariables.set(\"tx_source_type\", \"bank\");\r\npm.collectionVariables.set(\"tx_transaction_type\", \"expense\");\r\npm.collectionVariables.set(\"tx_institution_name\", \"Test Bank\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Transaction fields are returned\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"title\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"amount\");\r\n    pm.expect(response).to.have.property(\"category\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"date\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"source_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"transaction_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"institution_name\").that.is.a(\"string\");\r\n});\r\n\r\npm.test(\"Fields match what was sent\", function () {\r\n    pm.expect(response.title).to.eql(pm.collectionVariables.get(\"tx_title\"));\r\n    pm.expect(Number(response.amount)).to.eql(Number(pm.collectionVariables.get(\"tx_amount\")));\r\n    pm.expect(response.category).to.eql(pm.collectionVariables.get(\"tx_category\"));\r\n    pm.expect(response.date).to.eql(pm.collectionVariables.get(\"tx_date\"));\r\n    pm.expect(response.source_type).to.eql(pm.collectionVariables.get(\"tx_source_type\"));\r\n    pm.expect(response.transaction_type).to.eql(pm.collectionVariables.get(\"tx_transaction_type\"));\r\n    pm.expect(response.institution_name).to.eql(pm.collectionVariables.get(\"tx_institution_name\"));\r\n});\r\n\r\n// Sonraki isteklerde (GET/PUT/DELETE /transactions/{id}) kullanmak için kaydet\r\nif (pm.response.code === 201) {\r\n    pm.collectionVariables.set(\"transaction_id\", response.id);\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"{{tx_title}}\",\r\n  \"amount\": \"{{tx_amount}}\",\r\n  \"category\": \"{{tx_category}}\",\r\n  \"date\": \"{{tx_date}}\",\r\n  \"source_type\": \"{{tx_source_type}}\",\r\n  \"transaction_type\": \"{{tx_transaction_type}}\",\r\n  \"institution_name\": \"{{tx_institution_name}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/transactions",
               "host": [
@@ -808,6 +854,42 @@
     },
     {
       "key": "decide_source_type",
+      "value": ""
+    },
+    {
+      "key": "decide_status_candidates",
+      "value": ""
+    },
+    {
+      "key": "decided_item_title",
+      "value": ""
+    },
+    {
+      "key": "tx_title",
+      "value": ""
+    },
+    {
+      "key": "tx_amount",
+      "value": ""
+    },
+    {
+      "key": "tx_category",
+      "value": ""
+    },
+    {
+      "key": "tx_date",
+      "value": ""
+    },
+    {
+      "key": "tx_source_type",
+      "value": ""
+    },
+    {
+      "key": "tx_transaction_type",
+      "value": ""
+    },
+    {
+      "key": "tx_institution_name",
       "value": ""
     }
   ]
