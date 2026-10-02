@@ -711,7 +711,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Transaction fields are returned\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"title\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"amount\");\r\n    pm.expect(response).to.have.property(\"category\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"date\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"source_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"transaction_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"institution_name\").that.is.a(\"string\");\r\n});\r\n\r\npm.test(\"Fields match what was sent\", function () {\r\n    pm.expect(response.title).to.eql(pm.collectionVariables.get(\"tx_title\"));\r\n    pm.expect(Number(response.amount)).to.eql(Number(pm.collectionVariables.get(\"tx_amount\")));\r\n    pm.expect(response.category).to.eql(pm.collectionVariables.get(\"tx_category\"));\r\n    pm.expect(response.date).to.eql(pm.collectionVariables.get(\"tx_date\"));\r\n    pm.expect(response.source_type).to.eql(pm.collectionVariables.get(\"tx_source_type\"));\r\n    pm.expect(response.transaction_type).to.eql(pm.collectionVariables.get(\"tx_transaction_type\"));\r\n    pm.expect(response.institution_name).to.eql(pm.collectionVariables.get(\"tx_institution_name\"));\r\n});\r\n\r\n// Sonraki isteklerde (GET/PUT/DELETE /transactions/{id}) kullanmak için kaydet\r\nif (pm.response.code === 201) {\r\n    pm.collectionVariables.set(\"transaction_id\", response.id);\r\n}"
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Transaction fields are returned\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"title\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"amount\");\r\n    pm.expect(response).to.have.property(\"category\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"date\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"source_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"transaction_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"institution_name\").that.is.a(\"string\");\r\n});\r\n\r\npm.test(\"Fields match what was sent\", function () {\r\n    pm.expect(response.title).to.eql(pm.collectionVariables.get(\"tx_title\"));\r\n    pm.expect(Number(response.amount)).to.eql(Number(pm.collectionVariables.get(\"tx_amount\")));\r\n    pm.expect(response.category).to.eql(pm.collectionVariables.get(\"tx_category\"));\r\n    pm.expect(response.date).to.eql(pm.collectionVariables.get(\"tx_date\"));\r\n    pm.expect(response.source_type).to.eql(pm.collectionVariables.get(\"tx_source_type\"));\r\n    pm.expect(response.transaction_type).to.eql(pm.collectionVariables.get(\"tx_transaction_type\"));\r\n    pm.expect(response.institution_name).to.eql(pm.collectionVariables.get(\"tx_institution_name\"));\r\n});\r\n\r\n\r\nif (pm.response.code === 201) {\r\n    pm.collectionVariables.set(\"transaction_id\", response.id);\r\n}"
                 ]
               }
             }
@@ -735,6 +735,295 @@
               ],
               "path": [
                 "transactions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update Transaction",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\npm.collectionVariables.set(\"tx_update_title\", `Güncellenmiş işlem ${randomNumber}`);\r\npm.collectionVariables.set(\"tx_update_amount\", -(Math.floor(Math.random() * 500) + 10));\r\npm.collectionVariables.set(\"tx_update_category\", \"Faturalar\");\r\npm.collectionVariables.set(\"tx_update_date\", new Date().toISOString().split(\"T\")[0]);\r\npm.collectionVariables.set(\"tx_update_source_type\", \"credit_card\"); // orijinalden farklı seçtik, değişimi doğrulamak için\r\npm.collectionVariables.set(\"tx_update_transaction_type\", \"expense\");\r\npm.collectionVariables.set(\"tx_update_institution_name\", \"Updated Bank\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Returned id matches transaction_id\", function () {\r\n    pm.expect(response.id).to.eql(Number(pm.collectionVariables.get(\"transaction_id\")));\r\n});\r\n\r\npm.test(\"Fields are updated as sent\", function () {\r\n    pm.expect(response.title).to.eql(pm.collectionVariables.get(\"tx_update_title\"));\r\n    pm.expect(Number(response.amount)).to.eql(Number(pm.collectionVariables.get(\"tx_update_amount\")));\r\n    pm.expect(response.category).to.eql(pm.collectionVariables.get(\"tx_update_category\"));\r\n    pm.expect(response.date).to.eql(pm.collectionVariables.get(\"tx_update_date\"));\r\n    pm.expect(response.source_type).to.eql(pm.collectionVariables.get(\"tx_update_source_type\"));\r\n    pm.expect(response.transaction_type).to.eql(pm.collectionVariables.get(\"tx_update_transaction_type\"));\r\n    pm.expect(response.institution_name).to.eql(pm.collectionVariables.get(\"tx_update_institution_name\"));\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"{{tx_update_title}}\",\r\n  \"amount\": {{tx_update_amount}},\r\n  \"category\": \"{{tx_update_category}}\",\r\n  \"date\": \"{{tx_update_date}}\",\r\n  \"source_type\": \"{{tx_update_source_type}}\",\r\n  \"transaction_type\": \"{{tx_update_transaction_type}}\",\r\n  \"institution_name\": \"{{tx_update_institution_name}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transactions/{{transaction_id}}?transaction_id={{transaction_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions",
+                "{{transaction_id}}"
+              ],
+              "query": [
+                {
+                  "key": "transaction_id",
+                  "value": "{{transaction_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete Transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {\r\n    pm.response.to.have.status(204);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response body is empty\", function () {\r\n    pm.expect(pm.response.text()).to.eql(\"\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/transactions/{{transaction_id}}?transaction_id={{transaction_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions",
+                "{{transaction_id}}"
+              ],
+              "query": [
+                {
+                  "key": "transaction_id",
+                  "value": "{{transaction_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "plans",
+      "item": [
+        {
+          "name": "Get Plans",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response is a string\", function () {\r\n    pm.expect(pm.response.text()).to.be.a(\"string\");\r\n});\r\n\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Plans",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\npm.collectionVariables.set(\"plan_name\", `Test Plan ${randomNumber}`);\r\npm.collectionVariables.set(\"plan_type\", \"installment\");\r\npm.collectionVariables.set(\"plan_target_amount\", 10000);\r\npm.collectionVariables.set(\"plan_monthly_amount\", 1000);\r\npm.collectionVariables.set(\"plan_total_installments\", 10);\r\npm.collectionVariables.set(\"plan_paid_installments\", 2);\r\npm.collectionVariables.set(\"plan_payment_day\", 15);\r\npm.collectionVariables.set(\"plan_start_date\", new Date().toISOString().split(\"T\")[0]);\r\npm.collectionVariables.set(\"plan_notes\", \"Postman testi ile oluşturuldu\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Plan fields are returned\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"name\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"plan_type\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"target_amount\");\r\n    pm.expect(response).to.have.property(\"monthly_amount\");\r\n    pm.expect(response).to.have.property(\"total_installments\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"paid_installments\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"payment_day\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"remaining_installments\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"spent_amount\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"remaining_amount\").that.is.a(\"number\");\r\n    pm.expect(response).to.have.property(\"start_date\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"notes\").that.is.a(\"string\");\r\n    pm.expect(response).to.have.property(\"entries\").that.is.an(\"array\");\r\n});\r\n\r\npm.test(\"Fields match what was sent\", function () {\r\n    pm.expect(response.name).to.eql(pm.collectionVariables.get(\"plan_name\"));\r\n    pm.expect(response.plan_type).to.eql(pm.collectionVariables.get(\"plan_type\"));\r\n    pm.expect(Number(response.target_amount)).to.eql(Number(pm.collectionVariables.get(\"plan_target_amount\")));\r\n    pm.expect(Number(response.monthly_amount)).to.eql(Number(pm.collectionVariables.get(\"plan_monthly_amount\")));\r\n    pm.expect(response.total_installments).to.eql(Number(pm.collectionVariables.get(\"plan_total_installments\")));\r\n    pm.expect(response.paid_installments).to.eql(Number(pm.collectionVariables.get(\"plan_paid_installments\")));\r\n    pm.expect(response.payment_day).to.eql(Number(pm.collectionVariables.get(\"plan_payment_day\")));\r\n    pm.expect(response.start_date).to.eql(pm.collectionVariables.get(\"plan_start_date\"));\r\n    pm.expect(response.notes).to.eql(pm.collectionVariables.get(\"plan_notes\"));\r\n});\r\n\r\npm.test(\"Calculated fields are correct\", function () {\r\n    const totalInstallments = Number(pm.collectionVariables.get(\"plan_total_installments\"));\r\n    const paidInstallments = Number(pm.collectionVariables.get(\"plan_paid_installments\"));\r\n    const targetAmount = Number(pm.collectionVariables.get(\"plan_target_amount\"));\r\n\r\n    pm.expect(response.remaining_installments).to.eql(totalInstallments - paidInstallments);\r\n    pm.expect(response.spent_amount).to.eql(0); // henüz entry eklenmedi\r\n    pm.expect(response.remaining_amount).to.eql(targetAmount); // spent_amount 0 olduğu için\r\n});\r\n\r\npm.test(\"New plan has no entries yet\", function () {\r\n    pm.expect(response.entries).to.be.empty;\r\n});\r\n\r\nif (pm.response.code === 201) {\r\n    pm.collectionVariables.set(\"plan_id\", response.id);\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"{{plan_name}}\",\r\n  \"plan_type\": \"{{plan_type}}\",\r\n  \"target_amount\": {{plan_target_amount}},\r\n  \"monthly_amount\": {{plan_monthly_amount}},\r\n  \"total_installments\": {{plan_total_installments}},\r\n  \"paid_installments\": {{plan_paid_installments}},\r\n  \"payment_day\": {{plan_payment_day}},\r\n  \"start_date\": \"{{plan_start_date}}\",\r\n  \"notes\": \"{{plan_notes}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create by id",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\npm.collectionVariables.set(\"entry_title\", `Taksit ödemesi ${randomNumber}`);\r\npm.collectionVariables.set(\"entry_amount\", 1000);\r\npm.collectionVariables.set(\"entry_date\", new Date().toISOString().split(\"T\")[0]);\r\npm.collectionVariables.set(\"entry_notes\", \"Postman testi ile eklendi\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response is the full plan object\", function () {\r\n    pm.expect(response).to.have.property(\"id\").that.eql(Number(pm.collectionVariables.get(\"plan_id\")));\r\n    pm.expect(response).to.have.property(\"entries\").that.is.an(\"array\").that.is.not.empty;\r\n});\r\n\r\npm.test(\"New entry appears in the entries list\", function () {\r\n    const entryTitle = pm.collectionVariables.get(\"entry_title\");\r\n    const found = response.entries.find(e => e.title === entryTitle);\r\n    pm.expect(found, \"Eklenen entry planın entries listesinde bulunamadı\").to.not.be.undefined;\r\n    pm.expect(Number(found.amount)).to.eql(Number(pm.collectionVariables.get(\"entry_amount\")));\r\n    pm.expect(found.date).to.eql(pm.collectionVariables.get(\"entry_date\"));\r\n    pm.expect(found.notes).to.eql(pm.collectionVariables.get(\"entry_notes\"));\r\n});\r\n\r\npm.test(\"spent_amount increased by entry amount\", function () {\r\n    const entryAmount = Number(pm.collectionVariables.get(\"entry_amount\"));\r\n    const previousSpent = Number(pm.collectionVariables.get(\"plan_spent_amount_before\") || 0);\r\n    pm.expect(response.spent_amount).to.eql(previousSpent + entryAmount);\r\n});\r\n\r\npm.test(\"paid_installments incremented if plan_type is installment\", function () {\r\n    // Create Plan testinde plan_type \"installment\" seçmiştik\r\n    const previousPaid = Number(pm.collectionVariables.get(\"plan_paid_installments\"));\r\n    pm.expect(response.paid_installments).to.eql(previousPaid + 1);\r\n});\r\n\r\n// Bir sonraki entry eklemesi için güncel spent_amount'ı sakla\r\npm.collectionVariables.set(\"plan_spent_amount_before\", response.spent_amount);\r\npm.collectionVariables.set(\"plan_paid_installments\", response.paid_installments);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"{{entry_title}}\",\r\n  \"amount\": {{entry_amount}},\r\n  \"date\": \"{{entry_date}}\",\r\n  \"notes\": \"{{entry_notes}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plans/{{plan_id}}/entries?plan_id={{plan_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                "{{plan_id}}",
+                "entries"
+              ],
+              "query": [
+                {
+                  "key": "plan_id",
+                  "value": "{{plan_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete Plans",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {\r\n    pm.response.to.have.status(204);\r\n});\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\n\r\npm.test(\"Response body is empty\", function () {\r\n    pm.expect(pm.response.text()).to.eql(\"\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plans/{{plan_id}}?plan_id={{plan_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                "{{plan_id}}"
+              ],
+              "query": [
+                {
+                  "key": "plan_id",
+                  "value": "{{plan_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "analytics",
+      "item": [
+        {
+          "name": "New Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response is a string\", function () {\r\n    pm.expect(pm.response.text()).to.be.a(\"string\");\r\n});\r\n\r\n\r\npm.test(\"Response time is acceptable\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics"
               ]
             }
           },
@@ -890,6 +1179,98 @@
     },
     {
       "key": "tx_institution_name",
+      "value": ""
+    },
+    {
+      "key": "transaction_id",
+      "value": ""
+    },
+    {
+      "key": "tx_update_title",
+      "value": ""
+    },
+    {
+      "key": "tx_update_amount",
+      "value": ""
+    },
+    {
+      "key": "tx_update_category",
+      "value": ""
+    },
+    {
+      "key": "tx_update_date",
+      "value": ""
+    },
+    {
+      "key": "tx_update_source_type",
+      "value": ""
+    },
+    {
+      "key": "tx_update_transaction_type",
+      "value": ""
+    },
+    {
+      "key": "tx_update_institution_name",
+      "value": ""
+    },
+    {
+      "key": "plan_name",
+      "value": ""
+    },
+    {
+      "key": "plan_type",
+      "value": ""
+    },
+    {
+      "key": "plan_target_amount",
+      "value": ""
+    },
+    {
+      "key": "plan_monthly_amount",
+      "value": ""
+    },
+    {
+      "key": "plan_total_installments",
+      "value": ""
+    },
+    {
+      "key": "plan_paid_installments",
+      "value": ""
+    },
+    {
+      "key": "plan_payment_day",
+      "value": ""
+    },
+    {
+      "key": "plan_start_date",
+      "value": ""
+    },
+    {
+      "key": "plan_notes",
+      "value": ""
+    },
+    {
+      "key": "plan_id",
+      "value": ""
+    },
+    {
+      "key": "entry_title",
+      "value": ""
+    },
+    {
+      "key": "entry_amount",
+      "value": ""
+    },
+    {
+      "key": "entry_date",
+      "value": ""
+    },
+    {
+      "key": "entry_notes",
+      "value": ""
+    },
+    {
+      "key": "plan_spent_amount_before",
       "value": ""
     }
   ]
