@@ -54,7 +54,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "const randomNumber = Math.floor(Math.random() * 100000);\r\n\r\npm.collectionVariables.set(\"name\", `Test User ${randomNumber}`);\r\npm.collectionVariables.set(\"email\", `testuser${randomNumber}@example.com`);\r\npm.collectionVariables.set(\"password\", \"Test123!!\");"
+                      "function randomAlpha(length) {\r\n    const letters = \"abcdefghijklmnopqrstuvwxyz\";\r\n    let result = \"\";\r\n    for (let i = 0; i < length; i++) {\r\n        result += letters.charAt(Math.floor(Math.random() * letters.length));\r\n    }\r\n    return result;\r\n}\r\n\r\nfunction capitalize(word) {\r\n    return word.charAt(0).toUpperCase() + word.slice(1);\r\n}\r\n\r\nconst randomFirstName = capitalize(randomAlpha(6));\r\nconst randomLastName = capitalize(randomAlpha(6));\r\nconst randomEmailTag = randomAlpha(8);\r\n\r\npm.collectionVariables.set(\"name\", `${randomFirstName} ${randomLastName}`);\r\npm.collectionVariables.set(\"email\", `${randomEmailTag}@test.com`);\r\npm.collectionVariables.set(\"password\", \"Test123!!\");\r\npm.collectionVariables.set(\"password_confirmation\", \"Test123!!\");"
                     ]
                   }
                 },
@@ -78,7 +78,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"{{name}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "raw": "{\n  \"name\": \"{{name}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"password_confirmation\":\"{{password_confirmation}}\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1271,6 +1271,10 @@
     },
     {
       "key": "plan_spent_amount_before",
+      "value": ""
+    },
+    {
+      "key": "password_confirmation",
       "value": ""
     }
   ]
