@@ -1,0 +1,4 @@
+name: FinanceCoach
+values:
+  - key: baseUrl
+    value: ''

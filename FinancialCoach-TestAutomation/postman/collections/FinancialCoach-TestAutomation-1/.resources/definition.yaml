@@ -1,0 +1,10 @@
+$kind: collection
+name: FinancialCoach-TestAutomation
+variables:
+  baseUrl: "{{baseUrl}}"
+auth:
+  - id: 306c5bb5-994d-4cfd-8ec5-539add5220a5
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{bearerToken}}"

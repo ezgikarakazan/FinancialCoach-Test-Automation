@@ -1,0 +1,10 @@
+$kind: collection
+description: ""
+variables:
+  baseUrl: "{{baseUrl}}"
+auth:
+  - id: 8914f0bf-f0cb-477c-92f3-5268c41d19e6
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{bearerToken}}"

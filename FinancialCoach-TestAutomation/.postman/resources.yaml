@@ -1,0 +1,6 @@
+workspace:
+  id: d69dec74-8047-4aa9-800a-33ee2cdbff94
+cloudResources:
+  collections:
+    ../postman/collections/FinancialCoach-TestAutomation: b56d5f6c-4120-4874-8f52-5b3fe36cd2f9
+    ../postman/collections/FinancialCoach-TestAutomation-1: 58259793-9accc83e-601b-4979-a1f1-85669c254b6d
